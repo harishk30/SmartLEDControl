@@ -7,7 +7,7 @@ import time
 
 logging.basicConfig(level=logging.INFO)
 
-openai.api_key = 'enter key here'
+
 
 LED_PIN = board.D18  
 NUM_LEDS = 300  
