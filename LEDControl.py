@@ -129,6 +129,13 @@ def sync_leds_with_spotify(start_color, end_color):
         beats = analysis['beats']
         segments = analysis['segments']
         beat_index = 0
+        max_intensity = 0
+        tempo = analysis['track']['tempo']
+        # Calculate the maximum intensity for normalization
+        for segment in segments:
+            segment_intensity = max(0, min(1, (segment['loudness_max'] + 60) / 60)) * tempo
+            if segment_intensity > max_intensity:
+                max_intensity = segment_intensity
         while current_track and current_track['is_playing']:
             current_position = current_track['progress_ms'] / 1000.0
             while beat_index < len(beats) and beats[beat_index]['start'] <= current_position:
@@ -137,7 +144,8 @@ def sync_leds_with_spotify(start_color, end_color):
                 duration = beat['duration'] * 1000  # convert to milliseconds
                 tempo = analysis['track']['tempo']
                 intensity = max(0, min(1, (segment['loudness_max'] + 60) / 60)) * tempo  # Combine loudness and tempo to determine intensity
-                if intensity > 125:  # Adjust this threshold to match your definition of "intense"
+                intensity_norm = intensity/max_intensity
+                if intensity_norm > 0.75: 
                     fade_between_colors(start_color, end_color, duration, steps=50)
                 else:
                     brightness = max(0, min(1, (segment['loudness_max'] + 60) / 60))  # scale loudness to a 0-1 range
